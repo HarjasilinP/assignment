@@ -1,41 +1,60 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
   Text,
-  TouchableOpacity
+  TouchableOpacity,
+  FlatList,
+  ScrollView,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
-const Page = () => {
-
-
+const Page = props => {
+  console.log(props.route.params.id, 'props');
+  const [data, setData] = useState('');
+  const [comments, setComments] = useState([]);
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/posts/' + props.route.params.id)
+      .then(response => response.json())
+      .then(json => setData(json));
+    fetch(
+      'https://jsonplaceholder.typicode.com/posts/' +
+        props.route.params.id +
+        '/comments',
+    )
+      .then(response => response.json())
+      .then(json => setComments(json));
+  }, []);
+  console.log('Data', comments);
   return (
-    <View>
+    <SafeAreaView style={{flex: 1}}>
       <Text style={styles.text}>Details About Post</Text>
-      <View style={{ margin: 20 }}>
-        <Text style={{ fontSize: 15, color: 'black' }}>
-          Post Id:1
-        </Text>
-        <Text style={{ fontSize: 15, color: 'black' }}>Title: hjkfhjfh hkdsbjkhjk</Text>
-        <Text style={{ fontSize: 15, color: 'black', }}
-          numberOfLines={1}
-        >
-          Body: hjkfhjfh hkdsbjkhjk jfhfhfhkfbh hgyugjjhjhbjghg hjgbjfghfuhruhwriu gghjffghjfhgvj
+      <View style={styles.margin}>
+        <Text style={styles.text2}>Post Id:{data.id}</Text>
+        <Text style={styles.text2}>Title: {data.title}</Text>
+        <Text style={styles.text2} numberOfLines={1}>
+          Body: {data.body}
         </Text>
       </View>
-      <View style={{margin:20}}>
-<Text style={styles.text}>
-Comments
-</Text>
+
+      <View style={styles.margin}>
+        <Text style={styles.text}>Comments</Text>
       </View>
-      
-      <TouchableOpacity
-      style={styles.box}>
-        <Text>Name:harz</Text>
-        <Text>Body: hjkfhjfh hkdsbjkhjk</Text>
-      </TouchableOpacity>
-    
-    </View>
+
+      <FlatList
+        data={comments}
+        keyExtractor={item => item.id}
+        style={styles.flat}
+        renderItem={({item}) => {
+          return (
+            <View style={styles.box}>
+              <Text>Name:{item.name}</Text>
+              <Text>Comment :{item.body}</Text>
+            </View>
+          );
+        }}
+      />
+    </SafeAreaView>
   );
 };
 
@@ -43,7 +62,7 @@ const styles = StyleSheet.create({
   text: {
     color: 'black',
     fontSize: 20,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   box: {
     width: '95%',
@@ -51,8 +70,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 10,
     alignSelf: 'center',
-    marginTop: 10
-  }
+    marginTop: 10,
+  },
+  text2: {
+    fontSize: 15,
+    color: 'black',
+  },
+  margin: {
+    margin: 20,
+  },
+  flat: {
+    paddingBottom: 20,
+    marginBottom: 30,
+  },
 });
 
 export default Page;
